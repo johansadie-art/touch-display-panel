@@ -6,16 +6,20 @@ struct ControlsStripView: View {
     @EnvironmentObject private var audio: AudioControlService
     @EnvironmentObject private var mic: MicMuteService
     @EnvironmentObject private var camera: CameraPrivacyService
+    @EnvironmentObject private var meet: MeetControlService
 
     var body: some View {
         Group {
             if compact {
-                HStack(spacing: 16) {
-                    volumeBlock
-                    toggleButtons
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 16) {
+                        volumeBlock
+                        toggleButtons
+                        meetButtons
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
             } else {
                 VStack(alignment: .leading, spacing: 28) {
                     Text("Controls")
@@ -24,6 +28,7 @@ struct ControlsStripView: View {
 
                     volumeBlock
                     toggleButtons
+                    meetButtons
                     Spacer(minLength: 0)
                     statusFooter
                 }
@@ -32,6 +37,7 @@ struct ControlsStripView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: compact ? .center : .topLeading)
         .background(PanelTheme.strip)
+        .onAppear { meet.refreshAccessibilityStatus() }
     }
 
     private var volumeBlock: some View {
@@ -120,11 +126,65 @@ struct ControlsStripView: View {
         }
     }
 
+    private var meetButtons: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if !compact {
+                Text("Google Meet")
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundStyle(PanelTheme.textSecondary)
+            }
+
+            LazyVGrid(
+                columns: [
+                    GridItem(.flexible(), spacing: 12),
+                    GridItem(.flexible(), spacing: 12)
+                ],
+                spacing: 12
+            ) {
+                TouchToggleButton(
+                    systemImage: "mic.circle.fill",
+                    title: "Meet mute",
+                    isActive: false,
+                    activeColor: PanelTheme.meet
+                ) {
+                    meet.toggleMute()
+                }
+
+                TouchToggleButton(
+                    systemImage: "video.circle.fill",
+                    title: "Meet camera",
+                    isActive: false,
+                    activeColor: PanelTheme.meet
+                ) {
+                    meet.toggleCamera()
+                }
+            }
+
+            if meet.needsAccessibility {
+                Button(action: meet.openAccessibilitySettings) {
+                    Text("Allow Accessibility to control Meet")
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(PanelTheme.meet)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .padding(.horizontal, 8)
+                        .background(PanelTheme.meet.opacity(0.18))
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Open Accessibility settings for Meet controls")
+            }
+        }
+    }
+
     private var statusFooter: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(audio.statusMessage)
                 .font(.system(size: 13, design: .rounded))
                 .foregroundStyle(PanelTheme.textSecondary)
+            Text(meet.statusMessage)
+                .font(.system(size: 13, design: .rounded))
+                .foregroundStyle(meet.needsAccessibility ? PanelTheme.meet : PanelTheme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
             if let note = camera.hardwareNote {
                 Text(note)
                     .font(.system(size: 12, design: .rounded))

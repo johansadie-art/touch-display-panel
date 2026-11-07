@@ -22,6 +22,8 @@
 	<string>public.app-category.utilities</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Touch Display Panel focuses your Google Meet tab in Chrome so Meet mute (⌘D) and Meet camera (⌘E) reach the call.</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>Touch Display Panel shows today’s Apple Calendar events on your second-screen touch panel and opens meetings when you tap them.</string>
 	<key>NSCalendarsUsageDescription</key>

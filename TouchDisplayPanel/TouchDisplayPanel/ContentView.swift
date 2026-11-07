@@ -10,14 +10,14 @@ struct ContentView: View {
                 if isWide {
                     HStack(spacing: 0) {
                         ControlsStripView()
-                            .frame(width: min(280, geo.size.width * 0.28))
+                            .frame(width: min(320, geo.size.width * 0.30))
                         TodayCalendarView()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                 } else {
                     VStack(spacing: 0) {
                         ControlsStripView(compact: true)
-                            .frame(height: min(160, geo.size.height * 0.28))
+                            .frame(height: min(200, geo.size.height * 0.32))
                         TodayCalendarView()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
@@ -37,6 +37,8 @@ enum PanelTheme {
     static let textSecondary = Color(red: 0.65, green: 0.68, blue: 0.72)
     static let accent = Color(red: 0.35, green: 0.72, blue: 0.55)
     static let danger = Color(red: 0.90, green: 0.35, blue: 0.35)
+    /// Distinct from system mute/camera — Meet-in-Chrome controls.
+    static let meet = Color(red: 0.30, green: 0.62, blue: 0.92)
     static let tapMin: CGFloat = 56
 }
 
@@ -45,6 +47,7 @@ enum PanelTheme {
         .environmentObject(AudioControlService())
         .environmentObject(MicMuteService())
         .environmentObject(CameraPrivacyService())
+        .environmentObject(MeetControlService())
         .environmentObject(CalendarService())
         .frame(width: 1280, height: 800)
 }
