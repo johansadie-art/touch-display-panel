@@ -1,17 +1,17 @@
 # Touch Display Panel
 
-Native SwiftUI **macOS** app for Johan’s second-screen touch display: large-tap system controls + today’s Apple Calendar.
+Native SwiftUI **macOS** app for Johan’s second-screen touch display: large-tap system controls, Google Meet-in-Chrome mute/camera, and today’s Apple Calendar.
 
 v1 scope is intentionally narrow — see [`docs/v1-scope.md`](docs/v1-scope.md). No daily brief, Reminders, Mem, or Google Calendar in this scaffold.
 
-> **Build/run requires a Mac with Xcode.** This repo was scaffolded on Linux cloud agents; compile and permission prompts only work on macOS.
+> **Build/run requires a Mac with Xcode.** This repo is edited on Linux cloud agents; compile and permission prompts only work on macOS.
 
 ## Open in Xcode
 
 1. On your Mac, clone this repo.
 2. Open **`TouchDisplayPanel/TouchDisplayPanel.xcodeproj`** in Xcode 15+ (macOS 14+ deployment target).
 3. Select the **TouchDisplayPanel** scheme and **My Mac** as the run destination.
-4. Signing: pick your Team under *Signing & Capabilities* (Automatic signing is enabled). App Sandbox + Calendars entitlement are already set.
+4. Signing: pick your Team under *Signing & Capabilities* (Automatic signing is enabled).
 5. Press **Run** (⌘R).
 
 ## Grant permissions
@@ -28,12 +28,40 @@ If previously denied:
 
 The panel lists calendars EventKit already has access to (same set as Calendar.app / Settings).
 
-### Microphone / camera
+### Accessibility (required for Meet mute / Meet camera)
+
+Meet buttons send Chrome shortcuts **⌘D** (mute) and **⌘E** (camera). macOS only allows that after Accessibility trust.
+
+1. Tap **Meet mute** or **Meet camera** once — macOS may prompt to open Accessibility settings.
+2. Or go to **System Settings → Privacy & Security → Accessibility**.
+3. Enable **Touch Display Panel** (add it with **+** if missing; use the built app under `~/Library/Developer/Xcode/DerivedData/…/Build/Products/Debug/` when running from Xcode).
+4. Return to the panel and tap again.
+
+If Accessibility is missing, the strip shows a soft-fail hint and a button that opens Accessibility settings. System volume/mute/mic are unchanged and do **not** need Accessibility.
+
+### Automation (optional, improves Meet focus)
+
+On first Meet tap, macOS may ask to allow controlling **Google Chrome** so the panel can select a `meet.google.com` tab before sending keys.
+
+- **System Settings → Privacy & Security → Automation** → Touch Display Panel → enable Google Chrome.
+- If Automation is denied, the panel still activates Chrome when possible and posts ⌘D / ⌘E; leave the Meet tab frontmost for reliable results.
+
+### Microphone / camera (system controls)
 
 v1 does **not** request mic or camera recording permission.
 
-- **Mic mute** toggles the **default input device mute** via Core Audio (no capture).
-- **Camera** is a privacy helper: it opens **System Settings → Privacy & Security → Camera**. There is no public macOS API to hard-kill the webcam for all apps; a hardware shutter or vendor driver hook is documented in code for later.
+- **Mic mute** toggles the **default input device mute** via Core Audio (no capture). Separate from **Meet mute**.
+- **Camera** (system) opens **System Settings → Privacy & Security → Camera**. Separate from **Meet camera**.
+
+## Google Meet buttons — how to test
+
+1. Grant Accessibility (and Automation for Chrome if prompted).
+2. In **Google Chrome**, join or open a [meet.google.com](https://meet.google.com) call/tab.
+3. On the touch panel, tap **Meet mute** → Chrome should toggle in-call mic (⌘D).
+4. Tap **Meet camera** → Chrome should toggle in-call camera (⌘E). Claude’s conflicting ⌘E shortcut was removed so Meet receives it.
+5. Confirm **Mute** / **Mic mute** on the panel still only affect **system** audio/input, not Meet’s in-call state alone.
+
+**Fallback:** if Chrome Meet isn’t found, bring the Meet tab frontmost yourself; the panel still posts the shortcuts after a soft status hint.
 
 ## Run on the touch display
 
@@ -54,6 +82,7 @@ Touch targets are sized ~56pt+; the layout is landscape-first (controls strip on
 | Output mute | **Core Audio** `kAudioDevicePropertyMute` (output) |
 | Mic mute | **Core Audio** input mute on default input device (may be unsupported on some Bluetooth/aggregate devices) |
 | Camera / webcam privacy | **Placeholder** — opens Camera privacy settings; panel-local “blocked” UI state only |
+| **Meet mute** (⌘D) / **Meet camera** (⌘E) | **CGEvent** + Accessibility; focuses Chrome Meet tab via AppleScript when Automation allows |
 | Today’s events (time, title, calendar color) | **EventKit** — full access request, day-change + store-change refresh |
 | Next-event highlight | Implemented (next non–all-day event whose end is still in the future) |
 | Tap event → Calendar / conference URL | Implemented (Meet/Zoom/Teams/Webex/FaceTime URL detection, else `ical://`) |
@@ -69,22 +98,23 @@ TouchDisplayPanel/
     TouchDisplayPanelApp.swift      # App entry + services
     ContentView.swift               # Landscape strip + Today layout
     Views/
-      ControlsStripView.swift
+      ControlsStripView.swift       # System + Meet controls
       TodayCalendarView.swift
     Services/
       AudioControlService.swift     # Core Audio volume/mute
       MicMuteService.swift          # Core Audio input mute
       CameraPrivacyService.swift    # Settings hook (documented)
+      MeetControlService.swift      # Meet ⌘D / ⌘E via Accessibility
       CalendarService.swift         # EventKit
     Helpers/
       DisplayPlacement.swift
-    Info.plist                      # Calendar usage strings
-    TouchDisplayPanel.entitlements  # Sandbox + calendars
+    Info.plist                      # Calendar + Apple Events usage strings
+    TouchDisplayPanel.entitlements  # Hardened Runtime Apple Events (sandbox off for CGEvent)
     Assets.xcassets
 ```
 
 ## Hardware / API notes for later
 
 - **Camera kill switch:** replace `CameraPrivacyService.togglePrivacy()` with a Continuity Camera / USB power / vendor SDK call when Johan’s panel hardware exposes one.
-- **Per-app meeting mute:** Zoom/Meet in-call mute is separate from system input mute; deep integration would need those apps’ APIs or Accessibility (not preferred for v1).
+- **App Sandbox:** left off so Meet CGEvent posting works with Accessibility; re-enable only with a non-sandboxed helper if distribution requires sandboxing.
 - **Focus / DND:** `SetFocus` / Intents or FocusFilter APIs — deferred.
