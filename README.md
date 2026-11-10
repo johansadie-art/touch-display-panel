@@ -84,6 +84,7 @@ Touch targets are sized ~56pt+; the layout is landscape-first (controls strip on
 | Camera / webcam privacy | **Placeholder** — opens Camera privacy settings; panel-local “blocked” UI state only |
 | **Meet mute** (⌘D) / **Meet camera** (⌘E) | **CGEvent** + Accessibility; focuses Chrome Meet tab via AppleScript when Automation allows |
 | Today’s events (time, title, calendar color) | **EventKit** — full access request, day-change + store-change refresh |
+| Day timeline + overlap lanes | Vertical timed grid; concurrent meetings in side-by-side columns |
 | Next-event highlight | Implemented (next non–all-day event whose end is still in the future) |
 | Tap event → Calendar / conference URL | Implemented (Meet/Zoom/Teams/Webex/FaceTime URL detection, else `ical://`) |
 | Focus / DND | Not in this scaffold |
@@ -99,7 +100,7 @@ TouchDisplayPanel/
     ContentView.swift               # Landscape strip + Today layout
     Views/
       ControlsStripView.swift       # System + Meet controls
-      TodayCalendarView.swift
+      TodayCalendarView.swift       # Day timeline + overlap lanes
     Services/
       AudioControlService.swift     # Core Audio volume/mute
       MicMuteService.swift          # Core Audio input mute
@@ -108,6 +109,7 @@ TouchDisplayPanel/
       CalendarService.swift         # EventKit
     Helpers/
       DisplayPlacement.swift
+      DayTimelineLayout.swift       # Multi-column overlap packing
     Info.plist                      # Calendar + Apple Events usage strings
     TouchDisplayPanel.entitlements  # Hardened Runtime Apple Events (sandbox off for CGEvent)
     Assets.xcassets
