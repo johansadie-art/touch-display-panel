@@ -18,6 +18,7 @@
 		A10000000000000000000009 /* DisplayPlacement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000009 /* DisplayPlacement.swift */; };
 		A1000000000000000000000A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000A /* Assets.xcassets */; };
 		A1000000000000000000000E /* MeetControlService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000E /* MeetControlService.swift */; };
+		A1000000000000000000000F /* DayTimelineLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000F /* DayTimelineLayout.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		A20000000000000000000009 /* DisplayPlacement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayPlacement.swift; sourceTree = "<group>"; };
 		A2000000000000000000000A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A2000000000000000000000E /* MeetControlService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetControlService.swift; sourceTree = "<group>"; };
+		A2000000000000000000000F /* DayTimelineLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayTimelineLayout.swift; sourceTree = "<group>"; };
 		A2000000000000000000000B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A2000000000000000000000C /* TouchDisplayPanel.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TouchDisplayPanel.entitlements; sourceTree = "<group>"; };
 		A2000000000000000000000D /* TouchDisplayPanel.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TouchDisplayPanel.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -96,6 +98,7 @@
 			isa = PBXGroup;
 			children = (
 				A20000000000000000000009 /* DisplayPlacement.swift */,
+				A2000000000000000000000F /* DayTimelineLayout.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -187,6 +190,7 @@
 				A1000000000000000000000E /* MeetControlService.swift in Sources */,
 				A10000000000000000000008 /* CalendarService.swift in Sources */,
 				A10000000000000000000009 /* DisplayPlacement.swift in Sources */,
+				A1000000000000000000000F /* DayTimelineLayout.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
