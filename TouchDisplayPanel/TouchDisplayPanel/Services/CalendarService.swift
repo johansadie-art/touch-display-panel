@@ -33,16 +33,25 @@ final class CalendarService: ObservableObject {
     @Published private(set) var isLoading: Bool = false
     @Published private(set) var lastError: String?
     @Published private(set) var dayLabel: String = ""
+    /// Bumped on manual refresh so the timeline can scroll back to now.
+    @Published private(set) var refreshGeneration: UInt = 0
 
     private let store = EKEventStore()
     private var dayChangeCancellable: AnyCancellable?
+    private var periodicRefreshCancellable: AnyCancellable?
     private var storeChangedObserver: NSObjectProtocol?
+    private var loadingFeedbackTask: Task<Void, Never>?
+
+    /// Light poll so the next-meeting highlight and day window stay current across midnight.
+    private static let periodicRefreshInterval: TimeInterval = 60
+    private static let manualLoadingFeedbackNanoseconds: UInt64 = 350_000_000
 
     func start() {
         authorizationStatus = Self.currentStatus()
         updateDayLabel()
         observeDayChange()
         observeStoreChanges()
+        observePeriodicRefresh()
         if Self.hasReadAccess(authorizationStatus) {
             refreshEvents()
         }
@@ -52,6 +61,7 @@ final class CalendarService: ObservableObject {
         if let storeChangedObserver {
             NotificationCenter.default.removeObserver(storeChangedObserver)
         }
+        loadingFeedbackTask?.cancel()
     }
 
     func requestAccess() async {
@@ -76,16 +86,30 @@ final class CalendarService: ObservableObject {
         }
     }
 
-    func refreshEvents() {
+    /// Touch-panel Refresh: reload today’s events and signal the timeline to scroll to now.
+    func refreshFromUser() {
         guard Self.hasReadAccess(authorizationStatus) else { return }
-        isLoading = true
-        defer { isLoading = false }
+        guard !isLoading else { return }
+        refreshEvents(userInitiated: true)
+    }
+
+    func refreshEvents(userInitiated: Bool = false) {
+        guard Self.hasReadAccess(authorizationStatus) else { return }
+
+        if userInitiated {
+            loadingFeedbackTask?.cancel()
+            isLoading = true
+        }
+
         lastError = nil
         updateDayLabel()
 
         let cal = Calendar.current
         let start = cal.startOfDay(for: Date())
-        guard let end = cal.date(byAdding: .day, value: 1, to: start) else { return }
+        guard let end = cal.date(byAdding: .day, value: 1, to: start) else {
+            if userInitiated { finishManualLoadingFeedback() }
+            return
+        }
 
         let predicate = store.predicateForEvents(withStart: start, end: end, calendars: nil)
         let ekEvents = store.events(matching: predicate)
@@ -94,6 +118,20 @@ final class CalendarService: ObservableObject {
         let mapped = ekEvents.map { Self.map($0) }
         events = mapped
         nextEventID = Self.resolveNextEventID(in: mapped, now: Date())
+
+        if userInitiated {
+            refreshGeneration &+= 1
+            finishManualLoadingFeedback()
+        }
+    }
+
+    private func finishManualLoadingFeedback() {
+        loadingFeedbackTask?.cancel()
+        loadingFeedbackTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: Self.manualLoadingFeedbackNanoseconds)
+            guard !Task.isCancelled else { return }
+            isLoading = false
+        }
     }
 
     func open(_ event: CalendarEventItem) {
@@ -131,6 +169,18 @@ final class CalendarService: ObservableObject {
             .sink { [weak self] _ in
                 self?.refreshEvents()
             }
+    }
+
+    private func observePeriodicRefresh() {
+        periodicRefreshCancellable = Timer.publish(
+            every: Self.periodicRefreshInterval,
+            on: .main,
+            in: .common
+        )
+        .autoconnect()
+        .sink { [weak self] _ in
+            self?.refreshEvents()
+        }
     }
 
     private func observeStoreChanges() {
