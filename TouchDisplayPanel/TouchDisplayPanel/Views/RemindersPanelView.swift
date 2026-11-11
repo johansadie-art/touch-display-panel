@@ -145,10 +145,10 @@ private struct ReminderRowView: View {
     let onOpen: () -> Void
 
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
+        HStack(alignment: .top, spacing: 10) {
             Button(action: onToggle) {
                 Image(systemName: "circle")
-                    .font(.system(size: 26, weight: .regular))
+                    .font(.system(size: 24, weight: .regular))
                     .foregroundStyle(item.isOverdue ? PanelTheme.danger : PanelTheme.accent)
                     .frame(width: PanelTheme.tapMin, height: PanelTheme.tapMin)
                     .contentShape(Rectangle())
@@ -157,18 +157,21 @@ private struct ReminderRowView: View {
             .accessibilityLabel("Mark \(item.title) complete")
 
             Button(action: onOpen) {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 8) {
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(alignment: .top, spacing: 6) {
                         Text(item.title)
-                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            .font(.system(size: 15, weight: .semibold, design: .rounded))
                             .foregroundStyle(PanelTheme.textPrimary)
                             .multilineTextAlignment(.leading)
-                            .lineLimit(2)
+                            .lineLimit(4)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
 
                         if item.hasPriority {
                             Image(systemName: "exclamationmark.circle.fill")
-                                .font(.system(size: 12, weight: .bold))
+                                .font(.system(size: 11, weight: .bold))
                                 .foregroundStyle(PanelTheme.remindersFlag)
+                                .padding(.top, 2)
                                 .accessibilityLabel("Priority")
                         }
                     }
@@ -176,18 +179,18 @@ private struct ReminderRowView: View {
                     HStack(spacing: 8) {
                         if let dueLabel = item.dueLabel {
                             Text(dueLabel)
-                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .font(.system(size: 12, weight: .medium, design: .rounded))
                                 .foregroundStyle(item.isOverdue ? PanelTheme.danger : PanelTheme.textSecondary)
                         }
                         if let listName = item.listName {
                             Text(listName)
-                                .font(.system(size: 13, design: .rounded))
+                                .font(.system(size: 12, design: .rounded))
                                 .foregroundStyle(PanelTheme.textSecondary)
                                 .lineLimit(1)
                         }
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, minHeight: PanelTheme.tapMin - 12, alignment: .leading)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
@@ -195,8 +198,8 @@ private struct ReminderRowView: View {
             .accessibilityHint("Opens in Reminders")
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .frame(maxWidth: .infinity, minHeight: PanelTheme.tapMin, alignment: .leading)
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity, minHeight: PanelTheme.tapMin, alignment: .topLeading)
         .background(PanelTheme.elevated)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
