@@ -122,7 +122,9 @@ final class MeetControlService: ObservableObject {
             return .meetTab
         }
 
-        let activated = chrome.activate(options: [.activateIgnoringOtherApps])
+        // macOS 14+: cooperative activation (activateIgnoringOtherApps is deprecated).
+        NSApp.yieldActivation(to: chrome)
+        let activated = chrome.activate()
         if !activated {
             statusMessage = "Meet: couldn’t focus Chrome — leave Meet frontmost and retry."
             return .none
