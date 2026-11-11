@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TodayCalendarView: View {
     @EnvironmentObject private var calendar: CalendarService
+    @EnvironmentObject private var reminders: RemindersService
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -39,7 +40,12 @@ struct TodayCalendarView: View {
         }
     }
 
+    /// Single global Refresh — shown when either Calendar or Reminders can be reloaded.
     private var canRefresh: Bool {
+        hasCalendarReadAccess || hasRemindersReadAccess
+    }
+
+    private var hasCalendarReadAccess: Bool {
         switch calendar.authorizationStatus {
         case .fullAccess, .authorized:
             return true
@@ -48,12 +54,26 @@ struct TodayCalendarView: View {
         }
     }
 
+    private var hasRemindersReadAccess: Bool {
+        switch reminders.authorizationStatus {
+        case .fullAccess, .authorized:
+            return true
+        default:
+            return false
+        }
+    }
+
+    private var isRefreshing: Bool {
+        calendar.isLoading || reminders.isLoading
+    }
+
     private var refreshButton: some View {
         Button {
             calendar.refreshFromUser()
+            reminders.refreshFromUser()
         } label: {
             HStack(spacing: 10) {
-                if calendar.isLoading {
+                if isRefreshing {
                     ProgressView()
                         .controlSize(.regular)
                         .tint(PanelTheme.textPrimary)
@@ -69,12 +89,12 @@ struct TodayCalendarView: View {
             .frame(minHeight: PanelTheme.tapMin)
             .background(PanelTheme.elevated)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .opacity(calendar.isLoading ? 0.7 : 1)
+            .opacity(isRefreshing ? 0.7 : 1)
         }
         .buttonStyle(.plain)
-        .disabled(calendar.isLoading)
-        .accessibilityLabel("Refresh calendar")
-        .accessibilityHint("Reloads today’s events and scrolls to now")
+        .disabled(isRefreshing)
+        .accessibilityLabel("Refresh")
+        .accessibilityHint("Reloads today’s calendar and Reminders")
     }
 
     private var permissionPrompt: some View {

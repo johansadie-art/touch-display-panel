@@ -97,7 +97,7 @@ Touch targets are sized ~56pt+; landscape layout is **controls | calendar | remi
 | **Meet mute** (⌘D) / **Meet camera** (⌘E) | **CGEvent** + Accessibility; focuses Chrome Meet tab via AppleScript when Automation allows |
 | Today’s events (time, title, calendar color) | **EventKit** — full access; EventKit store-change + day-change + ~60s periodic refresh |
 | Day timeline + overlap lanes | Vertical timed grid; concurrent meetings in side-by-side columns |
-| Touch **Refresh** | Large header control reloads today and scrolls the timeline to now |
+| Touch **Refresh** | One large Today-header control reloads today’s calendar **and** Apple Reminders; timeline scrolls to now |
 | All-day strip | Thin full-width horizontal bars stacked above the hour grid (near-full-day timed items included) |
 | Next-event highlight | Implemented (next non–all-day event whose end is still in the future) |
 | Tap event → Calendar / conference URL | Implemented (Meet/Zoom/Teams/Webex/FaceTime URL detection, else `ical://`) |

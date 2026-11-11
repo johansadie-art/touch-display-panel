@@ -73,9 +73,19 @@ final class RemindersService: ObservableObject {
         }
     }
 
-    func refreshReminders() {
+    /// Touch-panel Refresh: reload the filtered incomplete Reminders list.
+    func refreshFromUser() {
         guard Self.hasReadAccess(authorizationStatus) else { return }
-        isLoading = true
+        guard !isLoading else { return }
+        refreshReminders(userInitiated: true)
+    }
+
+    func refreshReminders(userInitiated: Bool = false) {
+        guard Self.hasReadAccess(authorizationStatus) else { return }
+
+        if userInitiated {
+            isLoading = true
+        }
         lastError = nil
 
         let predicate = store.predicateForIncompleteReminders(
@@ -87,7 +97,11 @@ final class RemindersService: ObservableObject {
         store.fetchReminders(matching: predicate) { [weak self] ekReminders in
             Task { @MainActor in
                 guard let self else { return }
-                defer { self.isLoading = false }
+                defer {
+                    if userInitiated {
+                        self.isLoading = false
+                    }
+                }
 
                 let now = Date()
                 let cal = Calendar.current
