@@ -15,11 +15,32 @@ enum DayTimelineLayout {
     static let defaultVisibleStartMinute = 6 * 60
     /// Exclusive end of the default day window (22:00).
     static let defaultVisibleEndMinute = 22 * 60
+    /// Timed events covering at least this many minutes are treated as all-day strips
+    /// (guards against holiday/synced items that span ~00:00–24:00 without `isAllDay`).
+    static let allDayDurationThresholdMinutes = 20 * 60
+
+    /// True for EventKit all-day events and near-full-day timed blocks that must not
+    /// become giant vertical timeline columns.
+    static func displaysAsAllDay(
+        _ event: CalendarEventItem,
+        dayStart: Date,
+        calendar: Calendar = .current
+    ) -> Bool {
+        if event.isAllDay { return true }
+        let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) ?? dayStart.addingTimeInterval(86400)
+        let start = clamp(event.startDate, dayStart: dayStart, dayEnd: dayEnd)
+        let end = clamp(event.endDate, dayStart: dayStart, dayEnd: dayEnd)
+        let duration = minutesFromDayStart(end, dayStart: dayStart) - minutesFromDayStart(start, dayStart: dayStart)
+        return duration >= allDayDurationThresholdMinutes
+    }
 
     /// Pack timed (non–all-day) events into overlap lanes.
-    static func layoutLanes(_ events: [CalendarEventItem]) -> [TimelineLaidOutEvent] {
+    static func layoutLanes(
+        _ events: [CalendarEventItem],
+        dayStart: Date = Calendar.current.startOfDay(for: Date())
+    ) -> [TimelineLaidOutEvent] {
         let timed = events
-            .filter { !$0.isAllDay }
+            .filter { !displaysAsAllDay($0, dayStart: dayStart) }
             .sorted { lhs, rhs in
                 if lhs.startDate != rhs.startDate {
                     return lhs.startDate < rhs.startDate
@@ -62,7 +83,7 @@ enum DayTimelineLayout {
         calendar: Calendar = .current
     ) -> Range<Int> {
         let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) ?? dayStart.addingTimeInterval(86400)
-        let timed = events.filter { !$0.isAllDay }
+        let timed = events.filter { !displaysAsAllDay($0, dayStart: dayStart, calendar: calendar) }
         guard !timed.isEmpty else {
             return defaultVisibleStartMinute..<defaultVisibleEndMinute
         }

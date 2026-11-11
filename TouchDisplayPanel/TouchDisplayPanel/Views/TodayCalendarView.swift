@@ -170,11 +170,11 @@ private struct DayTimelineView: View {
     }
 
     private var allDayEvents: [CalendarEventItem] {
-        events.filter(\.isAllDay)
+        events.filter { DayTimelineLayout.displaysAsAllDay($0, dayStart: dayStart) }
     }
 
     private var laidOut: [TimelineLaidOutEvent] {
-        DayTimelineLayout.layoutLanes(events)
+        DayTimelineLayout.layoutLanes(events, dayStart: dayStart)
     }
 
     private var visibleMinutes: Range<Int> {
@@ -234,24 +234,30 @@ private struct DayTimelineView: View {
         }
     }
 
+    /// Compact full-width horizontal bars stacked above the hour grid so the
+    /// timed timeline keeps most of the vertical space.
     private var allDayStrip: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             Text("All day")
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .foregroundStyle(PanelTheme.textSecondary)
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(allDayEvents) { event in
-                        TimelineEventBlock(
-                            event: event,
-                            isNext: event.id == nextEventID,
-                            compact: true
-                        ) {
-                            onOpen(event)
-                        }
-                        .frame(minWidth: 180, minHeight: PanelTheme.tapMin)
-                    }
+            if allDayEvents.count > 3 {
+                ScrollView {
+                    allDayBars
+                }
+                .frame(maxHeight: 3 * AllDayEventBar.barHeight + 2 * 6)
+            } else {
+                allDayBars
+            }
+        }
+    }
+
+    private var allDayBars: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            ForEach(allDayEvents) { event in
+                AllDayEventBar(event: event) {
+                    onOpen(event)
                 }
             }
         }
@@ -347,6 +353,50 @@ private struct DayTimelineView: View {
     private func hourLabel(_ minuteOfDay: Int) -> String {
         let hour = minuteOfDay / 60
         return String(format: "%02d:00", hour)
+    }
+}
+
+// MARK: - All-day bar
+
+private struct AllDayEventBar: View {
+    static let barHeight: CGFloat = 44
+
+    let event: CalendarEventItem
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 10) {
+                RoundedRectangle(cornerRadius: 2, style: .continuous)
+                    .fill(event.color)
+                    .frame(width: 4)
+
+                Text(event.title)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundStyle(PanelTheme.textPrimary)
+                    .lineLimit(1)
+
+                Spacer(minLength: 8)
+
+                if let calendarName = event.calendarName {
+                    Text(calendarName)
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundStyle(PanelTheme.textSecondary)
+                        .lineLimit(1)
+                }
+            }
+            .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity, minHeight: Self.barHeight, maxHeight: Self.barHeight, alignment: .leading)
+            .background(PanelTheme.elevated)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(event.color.opacity(0.35), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("All day, \(event.title)")
+        .accessibilityHint(event.hasConferenceURL ? "Opens conference link" : "Opens in Calendar")
     }
 }
 

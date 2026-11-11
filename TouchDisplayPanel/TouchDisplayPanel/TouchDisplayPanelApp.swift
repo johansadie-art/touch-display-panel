@@ -12,6 +12,7 @@ struct TouchDisplayPanelApp: App {
                 .environmentObject(appDelegate.cameraPrivacy)
                 .environmentObject(appDelegate.meetControl)
                 .environmentObject(appDelegate.calendarService)
+                .environmentObject(appDelegate.remindersService)
         }
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 1280, height: 800)
@@ -28,6 +29,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let cameraPrivacy = CameraPrivacyService()
     let meetControl = MeetControlService()
     let calendarService = CalendarService()
+    let remindersService = RemindersService()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
@@ -36,6 +38,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         micControl.start()
         meetControl.refreshAccessibilityStatus()
         calendarService.start()
+        remindersService.start()
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {

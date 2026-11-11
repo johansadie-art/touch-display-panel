@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Landscape, touch-first layout for a second display.
-/// Left strip: system controls. Main area: today's calendar.
+/// Left: system controls. Center: today’s calendar. Right: Apple Reminders.
 struct ContentView: View {
     var body: some View {
         GeometryReader { geo in
@@ -10,16 +10,20 @@ struct ContentView: View {
                 if isWide {
                     HStack(spacing: 0) {
                         ControlsStripView()
-                            .frame(width: min(320, geo.size.width * 0.30))
+                            .frame(width: min(280, geo.size.width * 0.22))
                         TodayCalendarView()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        RemindersPanelView()
+                            .frame(width: min(340, max(260, geo.size.width * 0.26)))
                     }
                 } else {
                     VStack(spacing: 0) {
                         ControlsStripView(compact: true)
-                            .frame(height: min(200, geo.size.height * 0.32))
+                            .frame(height: min(180, geo.size.height * 0.26))
                         TodayCalendarView()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        RemindersPanelView()
+                            .frame(height: min(280, geo.size.height * 0.34))
                     }
                 }
             }
@@ -39,6 +43,7 @@ enum PanelTheme {
     static let danger = Color(red: 0.90, green: 0.35, blue: 0.35)
     /// Distinct from system mute/camera — Meet-in-Chrome controls.
     static let meet = Color(red: 0.30, green: 0.62, blue: 0.92)
+    static let remindersFlag = Color(red: 0.95, green: 0.62, blue: 0.28)
     static let tapMin: CGFloat = 56
 }
 
@@ -49,5 +54,6 @@ enum PanelTheme {
         .environmentObject(CameraPrivacyService())
         .environmentObject(MeetControlService())
         .environmentObject(CalendarService())
+        .environmentObject(RemindersService())
         .frame(width: 1280, height: 800)
 }
