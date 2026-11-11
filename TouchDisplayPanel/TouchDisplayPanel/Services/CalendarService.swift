@@ -86,7 +86,7 @@ final class CalendarService: ObservableObject {
         }
     }
 
-    /// Touch-panel Refresh: reload today’s events and signal the timeline to scroll to now.
+    /// Part of the global touch Refresh: reload today’s events and scroll the timeline to now.
     func refreshFromUser() {
         guard Self.hasReadAccess(authorizationStatus) else { return }
         guard !isLoading else { return }
