@@ -83,8 +83,9 @@ Touch targets are sized ~56pt+; the layout is landscape-first (controls strip on
 | Mic mute | **Core Audio** input mute on default input device (may be unsupported on some Bluetooth/aggregate devices) |
 | Camera / webcam privacy | **Placeholder** — opens Camera privacy settings; panel-local “blocked” UI state only |
 | **Meet mute** (⌘D) / **Meet camera** (⌘E) | **CGEvent** + Accessibility; focuses Chrome Meet tab via AppleScript when Automation allows |
-| Today’s events (time, title, calendar color) | **EventKit** — full access request, day-change + store-change refresh |
+| Today’s events (time, title, calendar color) | **EventKit** — full access; EventKit store-change + day-change + ~60s periodic refresh |
 | Day timeline + overlap lanes | Vertical timed grid; concurrent meetings in side-by-side columns |
+| Touch **Refresh** | Large header control reloads today and scrolls the timeline to now |
 | Next-event highlight | Implemented (next non–all-day event whose end is still in the future) |
 | Tap event → Calendar / conference URL | Implemented (Meet/Zoom/Teams/Webex/FaceTime URL detection, else `ical://`) |
 | Focus / DND | Not in this scaffold |

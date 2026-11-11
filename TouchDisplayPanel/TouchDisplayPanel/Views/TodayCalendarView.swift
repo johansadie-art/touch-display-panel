@@ -23,7 +23,7 @@ struct TodayCalendarView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .firstTextBaseline) {
+        HStack(alignment: .center, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Today")
                     .font(.system(size: 36, weight: .bold, design: .rounded))
@@ -32,13 +32,49 @@ struct TodayCalendarView: View {
                     .font(.system(size: 18, weight: .medium, design: .rounded))
                     .foregroundStyle(PanelTheme.textSecondary)
             }
-            Spacer()
-            if calendar.isLoading {
-                ProgressView()
-                    .controlSize(.large)
-                    .tint(PanelTheme.accent)
+            Spacer(minLength: 12)
+            if canRefresh {
+                refreshButton
             }
         }
+    }
+
+    private var canRefresh: Bool {
+        switch calendar.authorizationStatus {
+        case .fullAccess, .authorized:
+            return true
+        default:
+            return false
+        }
+    }
+
+    private var refreshButton: some View {
+        Button {
+            calendar.refreshFromUser()
+        } label: {
+            HStack(spacing: 10) {
+                if calendar.isLoading {
+                    ProgressView()
+                        .controlSize(.regular)
+                        .tint(PanelTheme.textPrimary)
+                } else {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 20, weight: .semibold))
+                }
+                Text("Refresh")
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+            }
+            .foregroundStyle(PanelTheme.textPrimary)
+            .padding(.horizontal, 22)
+            .frame(minHeight: PanelTheme.tapMin)
+            .background(PanelTheme.elevated)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .opacity(calendar.isLoading ? 0.7 : 1)
+        }
+        .buttonStyle(.plain)
+        .disabled(calendar.isLoading)
+        .accessibilityLabel("Refresh calendar")
+        .accessibilityHint("Reloads today’s events and scrolls to now")
     }
 
     private var permissionPrompt: some View {
@@ -107,6 +143,7 @@ struct TodayCalendarView: View {
             DayTimelineView(
                 events: calendar.events,
                 nextEventID: calendar.nextEventID,
+                scrollToNowToken: calendar.refreshGeneration,
                 onOpen: { calendar.open($0) }
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -119,6 +156,7 @@ struct TodayCalendarView: View {
 private struct DayTimelineView: View {
     let events: [CalendarEventItem]
     let nextEventID: String?
+    let scrollToNowToken: UInt
     let onOpen: (CalendarEventItem) -> Void
 
     /// Vertical scale: ~72pt per hour keeps short meetings touchable after min-height clamp.
@@ -170,7 +208,7 @@ private struct DayTimelineView: View {
                                     eventBlocks(width: geo.size.width, now: context.date)
                                     nowLine(width: geo.size.width, now: context.date)
 
-                                    // Anchor near "now" for initial scroll.
+                                    // Anchor near "now" for initial / manual-refresh scroll.
                                     Color.clear
                                         .frame(width: 1, height: 1)
                                         .offset(y: yOffset(for: context.date) - 80)
@@ -180,6 +218,11 @@ private struct DayTimelineView: View {
                             }
                             .onAppear {
                                 DispatchQueue.main.async {
+                                    proxy.scrollTo("now-anchor", anchor: .top)
+                                }
+                            }
+                            .onChange(of: scrollToNowToken) { _, _ in
+                                withAnimation(.easeInOut(duration: 0.25)) {
                                     proxy.scrollTo("now-anchor", anchor: .top)
                                 }
                             }
