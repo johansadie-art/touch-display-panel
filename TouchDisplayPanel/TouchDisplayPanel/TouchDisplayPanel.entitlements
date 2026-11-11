@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<!-- Sandbox off: CGEvent Meet shortcuts + Accessibility require non-sandboxed posting.
-	     EventKit calendar access still works via Info.plist usage strings + user grant. -->
+	     EventKit calendar + reminders access works via Info.plist usage strings + user grant. -->
 	<key>com.apple.security.app-sandbox</key>
 	<false/>
 	<key>com.apple.security.automation.apple-events</key>

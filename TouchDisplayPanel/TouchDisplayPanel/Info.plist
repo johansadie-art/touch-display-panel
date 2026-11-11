@@ -28,6 +28,10 @@
 	<string>Touch Display Panel shows today’s Apple Calendar events on your second-screen touch panel and opens meetings when you tap them.</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Touch Display Panel shows today’s Apple Calendar events on your second-screen touch panel and opens meetings when you tap them.</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>Touch Display Panel shows incomplete Apple Reminders on your second-screen touch panel so you can review and complete them by touch.</string>
+	<key>NSRemindersUsageDescription</key>
+	<string>Touch Display Panel shows incomplete Apple Reminders on your second-screen touch panel so you can review and complete them by touch.</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSPrincipalClass</key>
