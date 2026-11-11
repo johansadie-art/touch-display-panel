@@ -14,7 +14,8 @@ struct ContentView: View {
                         TodayCalendarView()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                         RemindersPanelView()
-                            .frame(width: min(340, max(260, geo.size.width * 0.26)))
+                            // ~50% wider than the prior 260–340 / 26% column so titles can wrap.
+                            .frame(width: min(510, max(390, geo.size.width * 0.39)))
                     }
                 } else {
                     VStack(spacing: 0) {
