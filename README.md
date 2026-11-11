@@ -38,7 +38,7 @@ If previously denied:
 2. Enable **Touch Display Panel**
 3. Relaunch the app
 
-**Filter shown:** incomplete reminders that are due today/overdue, flagged, or undated (no due date). Checkbox marks complete via EventKit; tapping the row opens Reminders.
+**Filter shown:** incomplete reminders that are due today/overdue, have priority (`EKReminder.priority != 0`), or undated (no due date). EventKit has no public flagged API, so priority is the stand-in. Checkbox marks complete via EventKit; tapping the row opens Reminders.
 
 ### Accessibility (required for Meet mute / Meet camera)
 
@@ -101,7 +101,7 @@ Touch targets are sized ~56pt+; landscape layout is **controls | calendar | remi
 | All-day strip | Thin full-width horizontal bars stacked above the hour grid (near-full-day timed items included) |
 | Next-event highlight | Implemented (next non–all-day event whose end is still in the future) |
 | Tap event → Calendar / conference URL | Implemented (Meet/Zoom/Teams/Webex/FaceTime URL detection, else `ical://`) |
-| Apple Reminders (right column) | **EventKit** — incomplete due today/overdue, flagged, or undated; toggle complete + open Reminders |
+| Apple Reminders (right column) | **EventKit** — incomplete due today/overdue, priority, or undated; toggle complete + open Reminders |
 | Focus / DND | Not in this scaffold |
 | Claude brief / Mem / Google | Out of scope for v1 |
 

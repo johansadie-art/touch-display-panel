@@ -103,7 +103,7 @@ struct RemindersPanelView: View {
                 Text("No matching reminders.")
                     .font(.system(size: 18, design: .rounded))
                     .foregroundStyle(PanelTheme.textSecondary)
-                Text("Showing incomplete items that are due today/overdue, flagged, or undated.")
+                Text("Showing incomplete items that are due today/overdue, have priority, or undated.")
                     .font(.system(size: 14, design: .rounded))
                     .foregroundStyle(PanelTheme.textSecondary.opacity(0.85))
                     .fixedSize(horizontal: false, vertical: true)
@@ -165,10 +165,11 @@ private struct ReminderRowView: View {
                             .multilineTextAlignment(.leading)
                             .lineLimit(2)
 
-                        if item.isFlagged {
-                            Image(systemName: "flag.fill")
+                        if item.hasPriority {
+                            Image(systemName: "exclamationmark.circle.fill")
                                 .font(.system(size: 12, weight: .bold))
                                 .foregroundStyle(PanelTheme.remindersFlag)
+                                .accessibilityLabel("Priority")
                         }
                     }
 

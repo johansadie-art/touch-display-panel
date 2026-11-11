@@ -8,7 +8,8 @@ struct ReminderItem: Identifiable, Equatable {
     let id: String
     let title: String
     let dueLabel: String?
-    let isFlagged: Bool
+    /// EventKit has no public flagged API; `true` when `EKReminder.priority != 0`.
+    let hasPriority: Bool
     let isOverdue: Bool
     let listName: String?
     let calendarItemIdentifier: String
@@ -18,7 +19,7 @@ struct ReminderItem: Identifiable, Equatable {
 ///
 /// **Filter (documented default):** incomplete reminders that match any of:
 /// - due today or overdue
-/// - flagged
+/// - priority set (`EKReminder.priority != 0` — EventKit has no public `isFlagged`)
 /// - undated (no due date) on any Reminder list EventKit can read
 ///
 /// Completed reminders are never shown. Lists respect EventKit access grants.
@@ -29,7 +30,7 @@ final class RemindersService: ObservableObject {
     @Published private(set) var isLoading: Bool = false
     @Published private(set) var lastError: String?
     @Published private(set) var filterSummary: String =
-        "Incomplete · due today/overdue · flagged · undated"
+        "Incomplete · due today/overdue · priority · undated"
 
     private let store = EKEventStore()
     private var dayChangeCancellable: AnyCancellable?
@@ -97,8 +98,8 @@ final class RemindersService: ObservableObject {
                 let mapped = (ekReminders ?? [])
                     .compactMap { Self.mapIfMatching($0, startOfToday: startOfToday, startOfTomorrow: startOfTomorrow, calendar: cal) }
                     .sorted { lhs, rhs in
-                        // Flagged first, then overdue, then titled.
-                        if lhs.isFlagged != rhs.isFlagged { return lhs.isFlagged && !rhs.isFlagged }
+                        // Priority first, then overdue, then titled.
+                        if lhs.hasPriority != rhs.hasPriority { return lhs.hasPriority && !rhs.hasPriority }
                         if lhs.isOverdue != rhs.isOverdue { return lhs.isOverdue && !rhs.isOverdue }
                         return lhs.title.localizedCaseInsensitiveCompare(rhs.title) == .orderedAscending
                     }
@@ -228,7 +229,8 @@ final class RemindersService: ObservableObject {
             dueDate = nil
         }
 
-        let isFlagged = reminder.isFlagged
+        // EKReminder does not expose Reminders.app “flagged”; priority ≠ none is the supported stand-in.
+        let hasPriority = reminder.priority != 0
         let isDueTodayOrOverdue: Bool
         let isOverdue: Bool
         if let dueDate {
@@ -240,7 +242,7 @@ final class RemindersService: ObservableObject {
         }
 
         let isUndated = dueDate == nil
-        guard isDueTodayOrOverdue || isFlagged || isUndated else { return nil }
+        guard isDueTodayOrOverdue || hasPriority || isUndated else { return nil }
 
         let titleValue = reminder.title ?? ""
         let rawTitle = titleValue.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -249,7 +251,7 @@ final class RemindersService: ObservableObject {
             id: reminder.calendarItemIdentifier,
             title: rawTitle.isEmpty ? "(No title)" : rawTitle,
             dueLabel: dueLabel(for: dueDate, isOverdue: isOverdue, calendar: calendar),
-            isFlagged: isFlagged,
+            hasPriority: hasPriority,
             isOverdue: isOverdue,
             listName: reminder.calendar?.title,
             calendarItemIdentifier: reminder.calendarItemIdentifier
