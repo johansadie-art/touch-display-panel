@@ -8,6 +8,8 @@ struct ReminderItem: Identifiable, Equatable {
     let id: String
     let title: String
     let dueLabel: String?
+    /// Formatted `EKReminder.creationDate` for the touch panel (e.g. "Created 11 Nov").
+    let createdLabel: String?
     /// EventKit has no public flagged API; `true` when `EKReminder.priority != 0`.
     let hasPriority: Bool
     let isOverdue: Bool
@@ -265,6 +267,7 @@ final class RemindersService: ObservableObject {
             id: reminder.calendarItemIdentifier,
             title: rawTitle.isEmpty ? "(No title)" : rawTitle,
             dueLabel: dueLabel(for: dueDate, isOverdue: isOverdue, calendar: calendar),
+            createdLabel: createdLabel(for: reminder.creationDate, calendar: calendar),
             hasPriority: hasPriority,
             isOverdue: isOverdue,
             listName: reminder.calendar?.title,
@@ -287,5 +290,23 @@ final class RemindersService: ObservableObject {
         let formatter = DateFormatter()
         formatter.dateFormat = "d MMM"
         return "Due \(formatter.string(from: dueDate))"
+    }
+
+    /// Touch-panel created stamp from EventKit `creationDate` — same short style as due labels.
+    private static func createdLabel(for creationDate: Date?, calendar: Calendar) -> String? {
+        guard let creationDate else { return nil }
+        if calendar.isDateInToday(creationDate) {
+            return "Created today"
+        }
+        if calendar.isDateInYesterday(creationDate) {
+            return "Created yesterday"
+        }
+        let formatter = DateFormatter()
+        if calendar.component(.year, from: creationDate) == calendar.component(.year, from: Date()) {
+            formatter.dateFormat = "d MMM"
+        } else {
+            formatter.dateFormat = "d MMM yyyy"
+        }
+        return "Created \(formatter.string(from: creationDate))"
     }
 }

@@ -7,7 +7,7 @@ Second-screen touch panel only. Large tap targets; not designed for the main dis
 - System controls: volume up/down or slider, mute, mic mute, webcam/camera privacy toggle (real APIs where straightforward; document hardware hooks otherwise)
 - Google Meet-in-Chrome controls: **Meet mute** (⌘D) and **Meet camera** (⌘E), separate from system mute/mic/camera; Accessibility required
 - Today’s Apple Calendar via EventKit: request access, day timeline of today’s events (time, title, calendar color, duration-sized blocks), side-by-side lanes for overlaps, compact **all-day horizontal bars** above the hour grid, highlight next event, auto-refresh (store + ~60s), tap opens Calendar or a conference URL
-- Apple Reminders via EventKit (right column): incomplete reminders that are **due today/overdue**, **priority** (`EKReminder.priority != 0`; EventKit has no public flagged API), or **undated**; large touch rows; checkbox toggles complete; row opens Reminders
+- Apple Reminders via EventKit (right column): incomplete reminders that are **due today/overdue**, **priority** (`EKReminder.priority != 0`; EventKit has no public flagged API), or **undated**; large touch rows with small right-aligned **Created** date (`EKReminder.creationDate`); checkbox toggles complete; row opens Reminders
 - Global touch **Refresh** (Today header): one control reloads today’s calendar and Reminders together; calendar timeline scrolls to now
 
 ## Out of scope

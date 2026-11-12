@@ -181,12 +181,21 @@ private struct ReminderRowView: View {
                             Text(dueLabel)
                                 .font(.system(size: 12, weight: .medium, design: .rounded))
                                 .foregroundStyle(item.isOverdue ? PanelTheme.danger : PanelTheme.textSecondary)
+                                .layoutPriority(1)
                         }
                         if let listName = item.listName {
                             Text(listName)
                                 .font(.system(size: 12, design: .rounded))
                                 .foregroundStyle(PanelTheme.textSecondary)
                                 .lineLimit(1)
+                        }
+                        Spacer(minLength: 4)
+                        if let createdLabel = item.createdLabel {
+                            Text(createdLabel)
+                                .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .foregroundStyle(PanelTheme.textSecondary)
+                                .lineLimit(1)
+                                .layoutPriority(1)
                         }
                     }
                 }
