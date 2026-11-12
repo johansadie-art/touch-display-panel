@@ -38,7 +38,7 @@ If previously denied:
 2. Enable **Touch Display Panel**
 3. Relaunch the app
 
-**Filter shown:** incomplete reminders that are due today/overdue, have priority (`EKReminder.priority != 0`), or undated (no due date). EventKit has no public flagged API, so priority is the stand-in. Checkbox marks complete via EventKit; tapping the row opens Reminders.
+**Filter shown:** incomplete reminders that are due today/overdue, have priority (`EKReminder.priority != 0`), or undated (no due date). EventKit has no public flagged API, so priority is the stand-in. Each row shows a small right-aligned **Created** stamp from EventKit `creationDate` (same style as due/overdue text). Checkbox marks complete via EventKit; tapping the row opens Reminders.
 
 ### Accessibility (required for Meet mute / Meet camera)
 
